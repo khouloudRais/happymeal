@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../style/panier.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
+    <title>Mes Favoris - Happy Meal</title>
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <div class="titre">
+                <h1>Mes Favoris</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="../index.html">Accueil</a></li>
+                    <li><a href="../files/cart.html">Panier</a></li>
+                 
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Section des favoris -->
+    <section class="favoris">
+        <h2>Recettes ajoutées aux favoris</h2>
+        <div id="favoritesList" class="favorites-container">
+            <!-- Les favoris seront insérés ici dynamiquement -->
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Happy Meal | Tous droits réservés</p>
+            <div class="footer-links">
+                <a href="#">À propos</a> | 
+                <a href="#">Nos produits</a> | 
+                <a href="#">Contactez-nous</a>
+            </div>
+            <div class="footer-socials">
+                <a href="#" target="_blank"><i class="bi bi-facebook"></i></a>
+                <a href="#" target="_blank"><i class="bi bi-instagram"></i></a>
+                <a href="#" target="_blank"><i class="bi bi-twitter"></i></a>
+            </div>
+        </div>
+    </footer>
+
+
+
+    <script>
+
+
+
+
+
+// Fonction pour ajouter une recette aux favoris
+function addFavorite(button, recette) {
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+    // Vérifier si la recette est déjà dans les favoris
+    const isFavorite = favorites.some(fav => fav.id === recette.id);
+
+    if (!isFavorite) {
+        // Ajouter la recette aux favoris
+        favorites.push(recette);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        console.log(`${recette.nom} a été ajouté aux favoris !`);  // Débogage
+
+        // Changer l'icône du cœur en plein
+        button.querySelector("i").classList.remove("bi-heart");
+        button.querySelector("i").classList.add("bi-heart-fill");
+    } else {
+        console.log(`${recette.nom} est déjà dans les favoris.`);  // Débogage
+    }
+}
+
+// Fonction pour récupérer et afficher les favoris sur la page des favoris
+function displayFavorites() {
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    let favoritesContainer = document.getElementById('favoritesList');
+
+    // Vérifier si des favoris existent
+    if (favorites.length === 0) {
+        favoritesContainer.innerHTML = '<p>Aucun favori ajouté pour le moment.</p>';
+        return;
+    }
+
+    // Réinitialiser le contenu de la liste des favoris
+    favoritesContainer.innerHTML = '';
+
+    // Ajouter chaque recette favorite dans le conteneur
+    favorites.forEach(recipe => {
+        let item = document.createElement('div');
+        item.classList.add('favorite-item');
+        item.innerHTML = `
+            <div class="favorite-recipe">
+                <img src="${recipe.image}" alt="${recipe.nom}" class="favorite-image">
+                <p>${recipe.nom}</p>
+                <button onclick="removeFavorite(${recipe.id})">❌ Supprimer</button>
+            </div>
+        `;
+        favoritesContainer.appendChild(item);
+    });
+}
+
+// Fonction pour supprimer une recette des favoris
+function removeFavorite(id) {
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    // Filtrer les favoris pour retirer celui avec l'ID correspondant
+    favorites = favorites.filter(recipe => recipe.id !== id);
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    displayFavorites(); // Mettre à jour l'affichage des favoris
+}
+
+// Lors du chargement de la page, on affiche les favoris existants
+window.onload = function() {
+    displayFavorites();
+};
+
+
+
+
+
+    </script>
+</body>
+
+</html>

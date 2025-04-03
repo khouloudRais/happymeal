@@ -19,8 +19,8 @@
             <nav>
                 <ul>
                     <li><a href="index.html">Accueil</a></li>
-                    <li><a href="#">Liste des ingrédients</a></li>
-                    <li><a href="#">Favoris</a></li>
+                    <li><a href="files/cart.html">Panier <span id="cart-count">0</span></a></li>
+                    <li><a href="files/favoris.html">Favoris</a></li>
                 </ul>
             </nav>
         </div>
@@ -36,26 +36,19 @@
     <section class="recettes">
         <h2>Nos Recettes</h2>
         <div id="recettes-container" class="row">
+            <div id="favoritesList"></div>
+            
+
+             <!-- Bouton cœur pour ajouter aux favoris -->
+             <button class="favorite-btn" onclick="addFavorite()">
+                <i class="bi bi-heart"></i> <!-- Icône cœur vide -->
+            </button>
+            
             <!-- Les recettes seront ajoutées ici dynamiquement -->
+         
         </div>
+        
     </section>
-
-
-<!-- Modal (initialement caché) -->
-<div class="modal" id="recipeModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Détails de la recette</h5>
-                <button type="button" class="btn-close" id="closeModalBtn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Information détaillée sur la recette...</p>
-            </div>
-        </div>
-    </div>
-</div>
-
 
     <!-- Modale de détail de la recette -->
     <div class="modal fade" id="recetteModal" tabindex="-1" aria-labelledby="recetteModalLabel" aria-hidden="true">
@@ -80,27 +73,7 @@
         </div>
     </div>
 
-    <!-- Panier -->
-    <div class="modal fade" id="panierModal" tabindex="-1" aria-labelledby="panierModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Panier d'ingrédients</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <ul id="panierList"></ul>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-danger" onclick="viderPanier()">Vider le panier</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="pagination" class="pagination-container text-center mt-4"></div>
-
-
 
     <footer>
         <div class="footer-content">
@@ -111,15 +84,9 @@
                 <a href="#">Contactez-nous</a>
             </div>
             <div class="footer-socials">
-                <a href="#" target="_blank">
-                    <i class="bi bi-facebook"></i>  
-                </a>
-                <a href="#" target="_blank">
-                    <i class="bi bi-instagram"></i>  
-                </a>
-                <a href="#" target="_blank">
-                    <i class="bi bi-twitter"></i>  
-                </a>
+                <a href="#" target="_blank"><i class="bi bi-facebook"></i></a>
+                <a href="#" target="_blank"><i class="bi bi-instagram"></i></a>
+                <a href="#" target="_blank"><i class="bi bi-twitter"></i></a>
             </div>
         </div>
     </footer>
@@ -127,195 +94,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Script pour charger et afficher les recettes -->
-    <script>
-        let recettes = []; // Pour stocker les recettes
-        let panier = []; // Pour stocker les ingrédients ajoutés au panier
-        let currentPage = 1; // Page actuelle
-        let recipesPerPage = 6; // Nombre de recettes par page
 
-        // Charger les recettes depuis le fichier JSON
-        fetch('data/data.json')
-            .then(response => response.json())
-            .then(data => {
-                recettes = data.recettes;
-                afficherRecettes(recettes, currentPage); // Afficher les recettes dès le chargement
-                afficherPagination(recettes, currentPage);
-            })
-            .catch(error => console.error("Erreur de chargement du JSON :", error));
-
-        // Fonction pour afficher les recettes de manière aléatoire
-        function afficherRecettes(recettes, page) {
-            const container = document.getElementById("recettes-container");
-            container.innerHTML = ''; // Réinitialiser le conteneur avant d'ajouter de nouvelles recettes
-
-            // Mélanger les recettes
-            const recettesMelangees = melangerRecettes(recettes);
-
-            // Calculer l'index de départ et de fin des recettes à afficher
-            const startIndex = (page - 1) * recipesPerPage;
-            const endIndex = startIndex + recipesPerPage;
-
-            // Limiter les recettes à afficher
-            const recettesAffichees = recettesMelangees.slice(startIndex, endIndex);
-
-            // Ajouter les recettes au conteneur
-            recettesAffichees.forEach(recette => {
-                const recetteElement = document.createElement("div");
-                recetteElement.classList.add("col-md-4", "mb-4");
-
-                recetteElement.innerHTML = `
-                    <div class="card">
-                        <img src="${recette.image}" class="card-img-top" alt="${recette.nom}">
-                        <div class="card-body">
-                            <h5 class="card-title">${recette.nom}</h5>
-                            <button class="btn btn-primary" onclick="afficherDetailsRecette('${recette.nom}')">
-                                Voir les détails
-                            </button>
-                            <button class="favorite-btn" onclick="toggleFavori(this)">
-                                <i class="bi bi-heart"></i> <!-- Icône du cœur -->
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(recetteElement);
-            });
-        }
-
-        // Fonction pour mélanger les recettes de manière aléatoire
-        function melangerRecettes(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]]; // Échanger les éléments
-            }
-            return array;
-        }
-
-        // Fonction pour afficher les détails d'une recette dans une modale
-        function afficherDetailsRecette(nomRecette) {
-            const recette = recettes.find(r => r.nom === nomRecette);
-            if (recette) {
-                const modalTitle = document.getElementById("modalTitle");
-                const modalImage = document.getElementById("modalImage");
-                const modalDescription = document.getElementById("modalDescription");
-                const modalCategorie = document.getElementById("modalCategorie");
-                const modalIngredients = document.getElementById("modalIngredients");
-                const modalEtapes = document.getElementById("modalEtapes");
-
-                modalTitle.textContent = recette.nom;
-                modalImage.src = recette.image;
-                modalDescription.textContent = "Temps de préparation: " + recette.temps_preparation;
-                modalCategorie.textContent = "Catégorie: " + recette.categorie;
-                modalEtapes.textContent = recette.etapes;
-
-                modalIngredients.innerHTML = '';
-                recette.ingredients.forEach(ingredient => {
-                    const li = document.createElement('li');
-                    li.textContent = `${ingredient.nom}: ${ingredient.quantite}`;
-                    const btnPlus = document.createElement('button');
-                    btnPlus.textContent = "+";
-                    btnPlus.classList.add('btn', 'btn-success', 'ms-2');
-                    btnPlus.onclick = () => ajouterIngredientPanier(ingredient);
-                    li.appendChild(btnPlus);
-                    modalIngredients.appendChild(li);
-                });
-
-                // Ouvrir la modale
-                const modal = new bootstrap.Modal(document.getElementById('recetteModal'));
-                modal.show();
-            }
-        }
-
-        // Fonction pour ajouter un ingrédient au panier
-        function ajouterIngredientPanier(ingredient) {
-            panier.push(ingredient);
-
-            // Mettre à jour le panier
-            const panierList = document.getElementById("panierList");
-            const li = document.createElement("li");
-            li.textContent = `${ingredient.nom}: ${ingredient.quantite}`;
-            panierList.appendChild(li);
-        }
-
-        // Ouvrir le panier modal
-        function ouvrirPanier() {
-            const modal = new bootstrap.Modal(document.getElementById('panierModal'));
-            modal.show();
-        }
-
-        // Fonction pour vider le panier
-        function viderPanier() {
-            panier = [];
-            const panierList = document.getElementById("panierList");
-            panierList.innerHTML = ''; // Réinitialiser la liste du panier
-        }
-
-        // Fonction d'autocomplétion pour la barre de recherche
-        function searchRecipe() {
-            let query = document.getElementById("searchBar").value.toLowerCase().trim();
-            let suggestionsList = document.getElementById("suggestionsList");
-            suggestionsList.innerHTML = ""; // Réinitialiser la liste
-
-            if (query.length === 0) return; // Ne rien afficher si la recherche est vide
-
-            let suggestions = new Set();
-
-            // Recherche dans les recettes
-            recettes.forEach(recipe => {
-                if (recipe.nom.toLowerCase().includes(query)) {
-                    suggestions.add(recipe.nom);
-                }
-            });
-
-            if (suggestions.size === 0) {
-                let li = document.createElement("li");
-                li.textContent = "Aucune suggestion";
-                suggestionsList.appendChild(li);
-            }
-
-            suggestions.forEach(suggestion => {
-                let li = document.createElement("li");
-                li.textContent = suggestion;
-                li.classList.add("suggestion-item");
-                li.onclick = function () {
-                    document.getElementById("searchBar").value = suggestion;
-                    suggestionsList.innerHTML = "";
-                    afficherDetailsRecette(suggestion); // Afficher les détails après clic
-                };
-                suggestionsList.appendChild(li);
-            });
-        }
-
-        // Fonction pour afficher la pagination
-        function afficherPagination(recettes, currentPage) {
-            const paginationContainer = document.getElementById("pagination");
-            paginationContainer.innerHTML = ''; // Réinitialiser la pagination
-
-            const totalPages = Math.ceil(recettes.length / recipesPerPage); // Calculer le nombre total de pages
-
-            // Créer les boutons de pagination
-            for (let i = 1; i <= totalPages; i++) {
-                const pageButton = document.createElement("button");
-                pageButton.textContent = i;
-                pageButton.classList.add("btn", "btn-secondary", "mx-1");
-                if (i === currentPage) {
-                    pageButton.classList.add("active"); // Ajouter une classe active à la page courante
-                }
-                pageButton.onclick = () => {
-                    currentPage = i;
-                    afficherRecettes(recettes, currentPage);
-                    afficherPagination(recettes, currentPage);
-                };
-                paginationContainer.appendChild(pageButton);
-            }
-        }
-
-        // Fonction pour alterner l'état du bouton favori
-        function toggleFavori(button) {
-            button.classList.toggle('active');
-        }
-
-    </script>
-</body>
-
-</html>
+    <script src="javascript/autocomplétion.js"></script>
+    <script src="javascript/favoris.js"></script>
+    <script src="javascript/shopping-list.js"></script>
