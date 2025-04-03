@@ -26,13 +26,21 @@
         </div>
     </header>
 
-    <!-- Section des favoris -->
-    <section class="favoris">
-        <h2>Recettes ajoutées aux favoris</h2>
-        <div id="favoritesList" class="favorites-container">
-            <!-- Les favoris seront insérés ici dynamiquement -->
-        </div>
-    </section>
+<!-- Section des favoris -->
+<section class="favoris">
+    <h2>Recettes ajoutées aux favoris</h2>
+
+    <!-- Message quand il n'y a pas de favoris -->
+    <div id="favoris-vide" style="display:none;">
+        <p>Il n'y a pas de favoris pour le moment.</p>
+    </div>
+
+    <!-- Liste des favoris -->
+    <div id="favoritesList" class="favorites-container">
+        <!-- Les favoris seront insérés ici dynamiquement -->
+    </div>
+</section>
+
 
     <footer>
         <div class="footer-content">
@@ -52,81 +60,10 @@
 
 
 
-    <script>
+    <script src="../javascript/favoris.js"></script>
+<script src="../javascript/script.js"></script>
 
 
-
-
-
-// Fonction pour ajouter une recette aux favoris
-function addFavorite(button, recette) {
-    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-
-    // Vérifier si la recette est déjà dans les favoris
-    const isFavorite = favorites.some(fav => fav.id === recette.id);
-
-    if (!isFavorite) {
-        // Ajouter la recette aux favoris
-        favorites.push(recette);
-        localStorage.setItem('favorites', JSON.stringify(favorites));
-        console.log(`${recette.nom} a été ajouté aux favoris !`);  // Débogage
-
-        // Changer l'icône du cœur en plein
-        button.querySelector("i").classList.remove("bi-heart");
-        button.querySelector("i").classList.add("bi-heart-fill");
-    } else {
-        console.log(`${recette.nom} est déjà dans les favoris.`);  // Débogage
-    }
-}
-
-// Fonction pour récupérer et afficher les favoris sur la page des favoris
-function displayFavorites() {
-    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    let favoritesContainer = document.getElementById('favoritesList');
-
-    // Vérifier si des favoris existent
-    if (favorites.length === 0) {
-        favoritesContainer.innerHTML = '<p>Aucun favori ajouté pour le moment.</p>';
-        return;
-    }
-
-    // Réinitialiser le contenu de la liste des favoris
-    favoritesContainer.innerHTML = '';
-
-    // Ajouter chaque recette favorite dans le conteneur
-    favorites.forEach(recipe => {
-        let item = document.createElement('div');
-        item.classList.add('favorite-item');
-        item.innerHTML = `
-            <div class="favorite-recipe">
-                <img src="${recipe.image}" alt="${recipe.nom}" class="favorite-image">
-                <p>${recipe.nom}</p>
-                <button onclick="removeFavorite(${recipe.id})">❌ Supprimer</button>
-            </div>
-        `;
-        favoritesContainer.appendChild(item);
-    });
-}
-
-// Fonction pour supprimer une recette des favoris
-function removeFavorite(id) {
-    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    // Filtrer les favoris pour retirer celui avec l'ID correspondant
-    favorites = favorites.filter(recipe => recipe.id !== id);
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-    displayFavorites(); // Mettre à jour l'affichage des favoris
-}
-
-// Lors du chargement de la page, on affiche les favoris existants
-window.onload = function() {
-    displayFavorites();
-};
-
-
-
-
-
-    </script>
 </body>
-
 </html>
+

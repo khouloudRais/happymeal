@@ -251,6 +251,9 @@ nav ul li a:hover {
 
 
 
+
+
+
 /* Le modal est masqué par défaut */
 .modal {
     display: none; /* Cache le modal par défaut */
@@ -263,12 +266,41 @@ nav ul li a:hover {
     z-index: 9999; /* Assure que le modal soit au-dessus du contenu */
     justify-content: center;
     align-items: center;
+    transition: opacity 0.3s ease-in-out;
 }
 
-/* Contenu du modal */
+.modal.show {
+    display: flex; /* Affiche le modal */
+    opacity: 1; /* Assure une transition fluide */
+}
+
 .modal-dialog {
-    max-width: 800px;
-    margin: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 90%;
+    max-height: 80%;
+    overflow-y: auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out;
+    transform: scale(0.9);
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1); /* Animation de l'apparition */
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #f1c40f;
+    padding-bottom: 10px;
+}
+
+.modal-body {
+    padding: 20px;
+    font-size: 1.1rem;
 }
 
 /* Bouton de fermeture */
@@ -276,56 +308,94 @@ nav ul li a:hover {
     background-color: #f1c40f;
     border: none;
     border-radius: 50%;
-    padding: 10px;
+    padding: 12px;
     cursor: pointer;
     font-size: 1.5rem;
     color: white;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-/* Ajouter un effet au survol du bouton */
 .btn-close:hover {
-    background-color: #e67e22;
+    background-color: #e65a22;
+    transform: scale(1.1);
 }
-
-
-
 
 /* ------------------------------------------
    Boutons personnalisés
 -------------------------------------------*/
 .btn-custom {
     background-color: #141414;
-    color: rgb(100, 98, 98);
+    color: #fff;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 5px;
     text-decoration: none;
     display: inline-block;
-    margin-top: 10px;
+    margin-top: 20px;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-custom:hover {
     background-color: #1c1c1c;
+    transform: scale(1.05);
+}
+
+.btn-custom:active {
+    background-color: #333;
+    transform: scale(0.98);
 }
 
 /* Bouton favori (cœur) */
 .favorite-btn {
     background: none;
     border: none;
-    color: #fff;
-    font-size: 2rem;
+    font-size: 30px;
     cursor: pointer;
-    transition: color 0.3s ease;
-    margin-top: 10px;
+    transition: transform 0.3s ease;
 }
 
-.favorite-btn:hover {
-    color: #e74c3c; /* Cœur rouge au survol */
+.favorite-btn i {
+    transition: color 0.3s ease, transform 0.3s ease;
 }
 
-.favorite-btn.active {
-    color: #e74c3c; /* Le cœur devient rouge quand favori */
+.favorite-btn:hover i {
+    transform: scale(1.1);
 }
+
+.favorite-btn i.bi-heart {
+    color: #ccc; /* Cœur vide, gris clair */
+}
+
+.favorite-btn i.bi-heart-fill {
+    color: #ff4d4d; /* Cœur rempli, rouge */
+}
+
+/* ------------------------------------------
+   Responsive Design
+-------------------------------------------*/
+@media (max-width: 768px) {
+    .modal-dialog {
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    .btn-custom {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+
+    .favorite-btn {
+        font-size: 28px;
+    }
+
+    .modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
 
 /* ------------------------------------------
    Pagination
@@ -443,6 +513,11 @@ nav ul li a:hover {
 .modal.show .modal-dialog {
     transform: translateY(0);
 }
+
+
+
+
+
 
 /* ------------------------------------------
    Footer
