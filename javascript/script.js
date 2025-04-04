@@ -1,58 +1,17 @@
+let recettes = []; // Pour stocker les recettes
+let currentPage = 1; // Page actuelle
+let recipesPerPage = 6; // Nombre de recettes par page
 
-        let recettes = []; // Pour stocker les recettes
-        let panier = []; // Pour stocker les ingrédients ajoutés au panier
-        let currentPage = 1; // Page actuelle
-        let recipesPerPage = 6; // Nombre de recettes par page
+// Charger les recettes depuis le fichier JSON
+fetch('data/data.json')
+    .then(response => response.json())
+    .then(data => {
+        recettes = data.recettes;
+        afficherRecettes(recettes, currentPage); // Afficher les recettes dès le chargement
+    })
+    .catch(error => console.error("Erreur de chargement du JSON :", error));
 
-        // Charger les recettes depuis le fichier JSON
-        fetch('data/data.json')
-            .then(response => response.json())
-            .then(data => {
-                recettes = data.recettes;
-                afficherRecettes(recettes, currentPage); // Afficher les recettes dès le chargement
-                afficherPagination(recettes, currentPage);
-            })
-            .catch(error => console.error("Erreur de chargement du JSON :", error));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-
-
-
-
-
-
-// Fonction pour afficher les recettes et intégrer le bouton de favoris
+// Fonction pour afficher les recettes
 function afficherRecettes(recettes, page) {
     const container = document.getElementById("recettes-container");
     container.innerHTML = ''; // Réinitialiser le conteneur avant d'ajouter de nouvelles recettes
@@ -72,12 +31,8 @@ function afficherRecettes(recettes, page) {
         const recetteElement = document.createElement("div");
         recetteElement.classList.add("col-md-4", "mb-4");
 
-        // Vérifier si la recette est déjà dans les favoris
-        let isFavori = false;
-        let favoris = JSON.parse(localStorage.getItem('favoris')) || [];
-        if (favoris.some(fav => fav.id === recette.id)) {
-            isFavori = true; // La recette est déjà dans les favoris
-        }
+        // Vérifier si la recette est un favori
+        const isFavori = checkIfFavori(recette.id);
 
         recetteElement.innerHTML = `
             <div class="card">
@@ -87,38 +42,14 @@ function afficherRecettes(recettes, page) {
                     <button class="btn btn-primary" onclick="afficherDetailsRecette('${recette.nom}')">
                         Voir les détails
                     </button>
-                    <button class="favorite-btn" onclick="toggleFavorite(this, ${JSON.stringify(recette)})">
-                        <i class="bi ${isFavori ? 'bi-heart-fill' : 'bi-heart'}"></i> <!-- Cœur plein ou vide -->
+                    <button class="favoris-btn ${isFavori ? 'favoris' : ''}" onclick="toggleFavoris(${recette.id}, this)">
+                        <i class="fa fa-heart"></i>
                     </button>
                 </div>
             </div>
         `;
         container.appendChild(recetteElement);
     });
-}
-
-// Fonction pour ajouter ou retirer une recette des favoris
-function toggleFavorite(button, recette) {
-    let favoris = JSON.parse(localStorage.getItem('favoris')) || []; 
-    console.log("Bouton de favoris cliqué !", recette.nom);
-
-    // Vérifier si la recette est déjà dans les favoris
-    const index = favoris.findIndex(r => r.id === recette.id);
-
-    if (index !== -1) {
-        // Si la recette est déjà dans les favoris, on la retire
-        favoris.splice(index, 1);
-        button.querySelector("i").classList.remove("bi-heart-fill");
-        button.querySelector("i").classList.add("bi-heart");
-    } else {
-        // Sinon, on l'ajoute aux favoris
-        favoris.push(recette);
-        button.querySelector("i").classList.remove("bi-heart");
-        button.querySelector("i").classList.add("bi-heart-fill");
-    }
-
-    // Sauvegarder les favoris mis à jour dans le localStorage
-    localStorage.setItem('favoris', JSON.stringify(favoris));
 }
 
 // Fonction pour mélanger les recettes (tirer au hasard)
@@ -130,15 +61,61 @@ function melangerRecettes(array) {
     return array;
 }
 
+// Vérifier si la recette est dans les favoris
+function checkIfFavori(id) {
+    let favoris = JSON.parse(localStorage.getItem("favoris")) || [];
+    return favoris.includes(id);
+}
 
+// Ajouter une recette aux favoris
+function addToFavoris(id) {
+    let favoris = JSON.parse(localStorage.getItem("favoris")) || [];
+    favoris.push(id);
+    localStorage.setItem("favoris", JSON.stringify(favoris));
+}
 
+// Retirer une recette des favoris
+function removeFromFavoris(id) {
+    let favoris = JSON.parse(localStorage.getItem("favoris")) || [];
+    favoris = favoris.filter(favoriId => favoriId !== id);
+    localStorage.setItem("favoris", JSON.stringify(favoris));
+}
 
+// Gérer l'ajout et le retrait des favoris
+function toggleFavoris(id, buttonElement) {
+    const isFavori = checkIfFavori(id);
 
+    if (isFavori) {
+        // Retirer des favoris
+        removeFromFavoris(id);
+        buttonElement.classList.remove('favoris'); // Retirer la classe 'favoris' pour changer la couleur
+    } else {
+        // Ajouter aux favoris
+        addToFavoris(id);
+        buttonElement.classList.add('favoris'); // Ajouter la classe 'favoris' pour changer la couleur
+    }
+}
 
+// Afficher les détails de la recette dans un modal
+function afficherDetailsRecette(nom) {
+    const recette = recettes.find(r => r.nom === nom);
 
+    // Mettre à jour le contenu du modal
+    document.getElementById("recette-detail-title").textContent = recette.nom;
+    document.getElementById("recette-detail-image").src = recette.image;
+    document.getElementById("recette-detail-description").textContent = recette.description;
 
+    // Afficher le modal
+    document.getElementById("recette-detail-modal").style.display = 'flex';
+}
 
+// Fermer le modal
+function closeRecetteDetail() {
+    document.getElementById("recette-detail-modal").style.display = 'none';
+}
 
+// Initialiser l'affichage des recettes au chargement de la page
+window.onload = afficherRecettes;
 
 
 
@@ -153,8 +130,24 @@ function melangerRecettes(array) {
 
 
 
+// Fonction pour afficher les détails d'une recette dans une modale
+function afficherDetailsRecette(nomRecette) {
+    const recette = recettes.find(r => r.nom === nomRecette);
+    if (recette) {
+        const modalTitle = document.getElementById("modalTitle");
+        const modalImage = document.getElementById("modalImage");
+        const modalDescription = document.getElementById("modalDescription");
+        const modalCategorie = document.getElementById("modalCategorie");
+        const modalIngredients = document.getElementById("modalIngredients");
+        const modalEtapes = document.getElementById("modalEtapes");
 
+        modalTitle.textContent = recette.nom;
+        modalImage.src = recette.image;
+        modalDescription.textContent = "Temps de préparation: " + recette.temps_preparation;
+        modalCategorie.textContent = "Catégorie: " + recette.categorie;
+        modalEtapes.textContent = recette.etapes;
 
+        modalIngredients.innerHTML = ''; // Réinitialiser la liste des ingrédients
 
 
 
@@ -170,94 +163,25 @@ function melangerRecettes(array) {
 
 
 
-
-
-
-
-
-
-        // Fonction pour mélanger les recettes
-        function melangerRecettes(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]]; // Échanger les éléments
-            }
-            return array;
-        }
-
-        // Fonction pour afficher les détails d'une recette dans une modale
-        function afficherDetailsRecette(nomRecette) {
-            const recette = recettes.find(r => r.nom === nomRecette);
-            if (recette) {
-                const modalTitle = document.getElementById("modalTitle");
-                const modalImage = document.getElementById("modalImage");
-                const modalDescription = document.getElementById("modalDescription");
-                const modalCategorie = document.getElementById("modalCategorie");
-                const modalIngredients = document.getElementById("modalIngredients");
-                const modalEtapes = document.getElementById("modalEtapes");
-
-                modalTitle.textContent = recette.nom;
-                modalImage.src = recette.image;
-                modalDescription.textContent = "Temps de préparation: " + recette.temps_preparation;
-                modalCategorie.textContent = "Catégorie: " + recette.categorie;
-                modalEtapes.textContent = recette.etapes;
-
-                modalIngredients.innerHTML = ''; // Réinitialiser la liste des ingrédients
-
-                // Créer un élément pour chaque ingrédient avec un bouton "+"
-                recette.ingredients.forEach(ingredient => {
-                    const li = document.createElement('li');
-                    li.textContent = `${ingredient.nom}: ${ingredient.quantite}`;
-
-                    const btnPlus = document.createElement('button');
-                    btnPlus.textContent = "+";
-                    btnPlus.classList.add('btn', 'btn-success', 'ms-2');
-                    btnPlus.onclick = () => ajouterAuPanier(ingredient); // Ajouter au panier
-
-                    li.appendChild(btnPlus);
-                    modalIngredients.appendChild(li);
-                });
-
-                // Ouvrir la modale
-                const modal = new bootstrap.Modal(document.getElementById('recetteModal'));
-                modal.show();
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        // Créer un élément pour chaque ingrédient avec un bouton "+"
+        recette.ingredients.forEach(ingredient => {
+            const li = document.createElement('li');
+            li.textContent = `${ingredient.nom}: ${ingredient.quantite}`;
+
+            const btnPlus = document.createElement('button');
+            btnPlus.textContent = "+";
+            btnPlus.classList.add('btn', 'btn-success', 'ms-2');
+            btnPlus.onclick = () => ajouterAuPanier(ingredient); // Ajouter au panier
+
+            li.appendChild(btnPlus);
+            modalIngredients.appendChild(li);
+        });
+
+        // Ouvrir la modale
+        const modal = new bootstrap.Modal(document.getElementById('recetteModal'));
+        modal.show();
+    }
+}
 
 
 

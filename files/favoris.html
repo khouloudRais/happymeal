@@ -27,20 +27,13 @@
     </header>
 
 <!-- Section des favoris -->
-<section class="favoris">
-    <h2>Recettes ajoutées aux favoris</h2>
+<div class="container">
+    <h1>Mes Recettes Favorites</h1>
 
-    <!-- Message quand il n'y a pas de favoris -->
-    <div id="favoris-vide" style="display:none;">
-        <p>Il n'y a pas de favoris pour le moment.</p>
-    </div>
-
-    <!-- Liste des favoris -->
-    <div id="favoritesList" class="favorites-container">
-        <!-- Les favoris seront insérés ici dynamiquement -->
-    </div>
-</section>
-
+    <!-- Message pour informer que la liste est vide -->
+    <div id="favoris-vide" style="display: none;">Aucun favori ajouté.</div>
+    <ul id="favoris-list"></ul>
+    
 
     <footer>
         <div class="footer-content">
